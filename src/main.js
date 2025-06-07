@@ -1,16 +1,38 @@
-/*
-  Створи список справ.
-  На сторінці є два інпути які має вводиться назва і текст задачі.
-  Після натискання на кнопку "Add" завдання додається до списку #task-list.
+import { refs } from './js/refs.js';
+import { taskManager } from './js/tasks.js';
+import { renderTasks, handleDelete } from './js/render-tasks.js';
+import { loadTasksFromLS, saveTasksToLS } from './js/local-storage-api.js';
+import { initTheme, toggleTheme } from './js/theme-switcher.js';
 
-  У кожної картки має бути кнопка "Delete", щоб можна було
-  прибрати завдання зі списку.
-  Список із завданнями має бути доступним після перезавантаження сторінки.
+  
+  initTheme();
 
-  Розмітка картки задачі
-  <li class="task-list-item">
-      <button class="task-list-item-btn">Delete</button>
-      <h3>Заголовок</h3>
-      <p>Текст</p>
-  </li>
-*/
+  const savedTasks = loadTasksFromLS();
+  taskManager.set(savedTasks);
+
+  renderTasks();
+
+
+refs.form.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const title = refs.inputTitle.value.trim();
+  const text = refs.inputDesc.value.trim();
+
+  if (!title || !text) return;
+
+  const newTask = {
+    id: Date.now().toString(),
+    title,
+    text,
+  };
+
+  taskManager.add(newTask);
+  saveTasksToLS(taskManager.getAll());
+  renderTasks();
+  refs.form.reset();
+});
+
+refs.taskList.addEventListener('click', handleDelete);
+
+refs.themeToggle.addEventListener('click', toggleTheme);
